@@ -1,0 +1,407 @@
+--- PAGE 0 ---
+PRD — Website Game Kartu Percakapan
+Versi 1.0 (draft untuk review) · 3 November 2026 · Nama produk sementara: “Kartu Game”
+Intinya: website game kartu untuk anak muda ke atas. Pemain memilih tema,
+mengocok atau men-spin kartu, membaca kata-kata di kartu, lalu mulai ngobrol. Isi
+kartu bisa ditambah kapan saja lewat admin, tanpa coding.
+1. Ringkasan Eksekutif
+Produk ini terdiri dari tiga bagian yang saling terhubung:
+1. Web App Pemain: landing page dark UI seperti foto referensi (hero besar + kipas
+kartu), halaman tema, dan layar game dengan animasi kocok/spin.
+2. Admin CMS: mengelola tema, kata-kata (isi kartu), aset karakter, pengguna, dan
+statistik.
+3. Studio Kartu: editor visual untuk membuat kartu, mengatur warna teks, lalu
+mengekspor hasilnya.
+Semuanya dibangun dari komponen React dengan satu sumber data: database
+PostgreSQL. Kartu di game, preview di admin, gambar untuk dibagikan, dan hasil ekspor
+dirender oleh komponen yang sama ( <ThemeCard> ), jadi tampilannya selalu konsisten.
+Aspek Keputusan
+Target pengguna Anak muda ke atas (17+), mobile-first
+Tema awal Family, Love, Passion + Friendship, Dreams,
+Gratitude; tema baru bisa ditambah dari admin
+Mekanik utama Kocok (shuffle) dan Spin
+Gaya visual Dark UI + kartu gradasi berani + karakter ilustrasi
+beranimasi (kartu sudah didesain)
+Stack yang direkomendasikan Next.js (React) + TypeScript + Tailwind + Framer
+Motion; Supabase (PostgreSQL, Auth, Storage,
+Realtime); Vercel
+MVP Landing, game solo (kocok & spin), 6 tema, admin
+CRUD + import kata-kata
+Bahasa Indonesia dulu, Inggris di fase lanjut
+PRD — Website Game Kartu Percakapan
+Page 1 of 10
+--- PAGE 1 ---
+2. Latar Belakang, Tujuan & Metrik Sukses
+2.1 Masalah dan peluang
+Kartu percakapan fisik mahal dicetak, isinya terbatas, dan sulit diperbarui. Versi web
+bisa dimainkan gratis, diperbarui kapan saja, dan mudah dibagikan.
+Pemilik produk perlu menambah kata-kata dan tema baru sendiri tanpa menunggu
+developer.
+Pengalamannya harus terasa seperti game (animasi, kejutan), bukan sekadar daftar
+pertanyaan.
+2.2 Tujuan
+G1. Main cepat: dari landing ke kartu pertama dalam ≤ 3 klik.
+G2. Landing page yang meniru gaya referensi (dark UI, hero besar, kipas kartu).
+G3. Konten skalabel: tema, kata-kata, dan kartu baru ditambah lewat admin tanpa
+coding.
+G4. Satu sumber kebenaran tampilan kartu: data JSON → komponen <ThemeCard>
+yang dipakai di game, admin, share, dan ekspor.
+G5. Fondasi siap tumbuh (multiplayer, deck kustom, PWA) tanpa merombak database.
+2.3 Di luar lingkup MVP
+Pembayaran/marketplace deck, cetak kartu fisik otomatis, video/voice chat, aplikasi
+native iOS/Android, dan fitur AI yang menjawab menggantikan pemain.
+2.4 Metrik sukses
+Angka di bawah adalah target awal (hipotesis) yang divalidasi setelah beta, diukur 3 bulan
+setelah rilis.
+Metrik Target Cara ukur
+Aktivasi ≥ 45% pengunjung landing menarik
+kartu pertama
+Event card_revealed  dibanding
+landing_viewed
+Kedalaman Rata-rata ≥ 8 kartu per sesi session_draws  per sesi
+Retensi ≥ 20% pemain kembali dalam 7 hari Analitik (device ID / akun)
+Dibagikan ≥ 5 share per 100 sesi Event share_clicked
+Konten ≥ 50 kartu published per tema saat
+rilis; ≥ 100 kartu baru per bulan
+Dashboard admin
+PRD — Website Game Kartu Percakapan
+Page 2 of 10
+--- PAGE 2 ---
+3. Pengguna & Persona
+Target usia 17+ (remaja akhir sampai dewasa). Pemain mayoritas memakai HP, sedangkan
+admin memakai laptop/desktop.
+Metrik Target Cara ukur
+Kecepatan LCP ≤ 2,5 dtk (4G, Android kelas
+menengah); animasi ≥ 50 fps
+Lighthouse CI, Web Vitals
+Stabilitas ≥ 99% sesi bebas error Sentry
+Efisiensi
+editor
+20 kartu baru masuk dalam ≤ 5
+menit lewat Tambah Massal
+Uji dengan pengguna
+Persona Konteks Kebutuhan Fitur kunci
+Rani, 22 Nongkrong bareng
+teman
+Cepat, estetik, seru
+dan kadang dalam
+Spin & kocok,
+Friendship/Dreams, share
+kartu
+Dimas & Sari, 27 Pasangan, malam
+santai
+Privasi, tema
+Love/Passion, filter
+level
+Level, favorit, filter
+konten dewasa
+Keluarga (17–55
+th)
+Kumpul keluarga,
+satu layar
+bergiliran
+Teks besar, mudah
+dipakai semua usia
+Family/Gratitude, mode
+bergiliran
+Admin/Editor Menulis dan
+merapikan konten
+tiap minggu
+Tambah kata-kata
+cepat, lihat preview
+kartu
+Admin CMS, Tambah
+Massal, Studio Kartu
+Kreator
+komunitas (fase
+3)
+Membuat deck
+sendiri
+Deck pribadi yang
+bisa dibagikan
+Deck kustom
+PRD — Website Game Kartu Percakapan
+Page 3 of 10
+--- PAGE 3 ---
+4. Keputusan & Asumsi dari Diskusi Desain
+Sumber desain kartu saat ini: Desain Kartu Game. Karakter animasi di sana akan
+dipindahkan menjadi komponen React ( <CharacterArt> ).
+Catatan hak cipta: foto referensi adalah tampilan toko game milik pihak lain. Kita
+hanya meniru gaya tata letak-nya. Logo, karakter, dan nama merek dari foto itu tidak
+dipakai.
+Topik Keputusan Status
+Tema awal Family, Love, Passion (dari kamu) +
+Friendship, Dreams, Gratitude
+(usulanku); tema lain bisa ditambah
+dari admin
+Daftar final perlu konfirmasi
+Gaya kartu Gradasi warna berani, judul kiri atas,
+pill nomor kanan atas, karakter besar,
+panel kaca untuk kata-kata di bawah
+(mengikuti foto referensi)
+Final (desain v2)
+Karakter Ilustrasi orisinal bergaya modern untuk
+anak muda ke atas (bukan gaya anak-
+anak), beranimasi halus. Tidak
+memakai karakter atau merek pihak
+lain
+Final
+Ukuran kartu 500×700 px (rasio 5:7), sudut 36 px Final
+Teks Font Poppins; warna teks default
+putih, bisa diatur per tema/kartu
+dengan pengecek kontras
+Menunggu daftar kata-kata
+dari kamu
+Mekanik Kocok dan spin Final
+Landing & layar
+game
+Meniru foto referensi (dark UI, hero,
+kipas kartu)
+Desain layar belum dibuat
+(Fase 0)
+Sisi belakang
+kartu
+Belum didesain, padahal dibutuhkan
+untuk animasi kocok
+Perlu dibuat (Fase 0)
+Bahasa Antarmuka Indonesia Asumsi
+Teknologi Next.js + Supabase + Vercel Rekomendasi
+PRD — Website Game Kartu Percakapan
+Page 4 of 10
+--- PAGE 4 ---
+5. Lingkup & Prioritas
+P0 = wajib untuk MVP, P1 = segera setelah MVP, P2 = fase lanjut, P3 = opsional.
+ID Fitur Prioritas
+F-01 Landing page (hero + kipas kartu) P0
+F-02 Halaman daftar tema dan detail tema P0
+F-03 Setup permainan (tema, level, pemain) P0
+F-04 Game board: kocok, spin, balik kartu P0
+F-05 Riwayat dan ringkasan sesi (lokal) P0
+F-06 Admin: kelola tema P0
+F-07 Admin: kata-kata/kartu (CRUD, Tambah Massal,
+import CSV, status)
+P0
+F-08 Aset karakter (upload SVG/Lottie/gambar) P0
+F-09 Studio Kartu (editor visual + ekspor PNG/PDF) P1
+F-10 Autentikasi dan peran (admin P0, pemain P1) P0/P1
+F-11 Favorit dan riwayat tersimpan di akun P1
+F-12 Bagikan kartu (link + gambar pratinjau) P1
+F-13 Alur review konten dan audit log P1
+F-14 Dashboard analitik P1
+F-15 Room multiplayer realtime P2
+F-16 Deck kustom P2
+F-17 PWA dan mode offline P2
+F-18 Dwibahasa (ID/EN) P2
+F-19 Ekspor PDF siap cetak P2
+F-20 Streak/poin (pill koin seperti di referensi) P2
+F-21 Premium deck / monetisasi P3
+PRD — Website Game Kartu Percakapan
+Page 5 of 10
+--- PAGE 5 ---
+6. Ekosistem & Arsitektur Sistem
+  Pemain (web / PWA)            Admin & Editor (CMS + Studio Kartu)
+         |                                  |
+         +------------------+---------------+
+                            v
+        Next.js (React 18 + TypeScript) di Vercel + CDN
+        - halaman dan komponen React
+        - Route Handlers / Server Actions = API
+                            |
+      +---------------+-----+---------+----------------+
+      v               v               v                v
+  PostgreSQL      Auth            Storage          Realtime
+  (RLS): tema,    (magic link,    (SVG, Lottie,    (room multiplayer,
+  kartu, sesi,    Google)         PNG, ekspor)     fase 2)
+  aset
+  Pendukung: PostHog (analitik) | Sentry (error) | GitHub Actions (CI/CD)
+Lapisan Pilihan Alasan Alternatif
+Frontend Next.js App Router,
+React 18, TypeScript
+SEO untuk landing dan
+halaman share, React
+Server Components, satu
+repo untuk pemain +
+admin
+React + Vite
+(SPA)
+Styling Tailwind CSS + CSS
+variables per tema
+Token warna per tema
+mudah diganti dari
+database
+CSS Modules
+Animasi Framer Motion (UI, flip,
+kocok, spin) + CSS
+keyframes (karakter
+SVG)
+Kontrol gestur dan spring;
+karakter tetap ringan
+GSAP
+State Zustand (game) +
+TanStack Query (data
+server)
+Ringan dan mudah dites Redux Toolkit
+Form & validasi React Hook Form + Zod Skema validasi dipakai
+ulang di klien dan API
+Formik
+Database PostgreSQL (Supabase)
++ Row Level Security
+Relasional, aman per
+peran, gratis untuk mulai
+Postgres
+sendiri +
+Prisma
+PRD — Website Game Kartu Percakapan
+Page 6 of 10
+--- PAGE 6 ---
+Alur data mode solo
+1. Setelah setup, klien mengunduh snapshot deck ( GET /api/decks/snapshot?
+themes=… ): ID, kata-kata, level, dan bobot kartu berstatus published. Ukurannya kecil
+(puluhan KB untuk 500 kartu) dan di-cache dengan ETag.
+2. Kocok/spin dihitung di klien oleh game engine (cepat dan bisa offline). Hasil undian
+ditentukan sebelum animasi dimulai.
+3. Event (kartu ditarik, dilewati, disimpan) dikirim berkelompok ke POST /api/events .
+4. Saat admin mem-publish kartu, versi snapshot naik. Pemain mendapat versi baru di sesi
+berikutnya (cache maksimal 5 menit).
+Mode room (fase 2) memakai server sebagai penentu urutan kartu agar semua perangkat
+melihat kartu yang sama.
+7. Peta Halaman & Alur Pengguna
+Lapisan Pilihan Alasan Alternatif
+Auth Supabase Auth (magic
+link, Google)
+Terintegrasi dengan RLS Auth.js
+Storage Supabase Storage + CDN Aset karakter dan kartu
+hasil ekspor
+S3 / Cloudflare
+R2
+Realtime Supabase Realtime (fase
+2)
+Room tanpa server
+tambahan
+Socket.IO
+Hosting &
+CI/CD
+Vercel + GitHub Actions Preview deploy untuk tiap
+pull request
+VPS + Docker
+Observabilitas Sentry, PostHog Error dan funnel Plausible
+Rute Halaman Akses Fase
+/ Landing Publik P0
+/themes , /themes/[slug] Daftar dan detail tema Publik P0
+/play Setup permainan Publik P0
+/play/[sessionId] Game board Publik P0
+/c/[id] Kartu yang dibagikan Publik P1
+/login , /me Masuk, favorit dan
+riwayat
+Pemain P1
+PRD — Website Game Kartu Percakapan
+Page 7 of 10
+--- PAGE 7 ---
+Alur utama
+A. Pemain baru: Landing → Mulai Main → Setup (tema, level, nama pemain) → Game
+board → kocok/spin → baca kartu → lanjut/lewati/simpan → Selesai (ringkasan + ajakan
+bagikan atau masuk).
+B. Dari kartu yang dibagikan: /c/[id]  → lihat kartu → Main tema ini.
+C. Editor menambah kata-kata: Admin → Kartu → Tambah Massal → pilih tema dan level
+→ tempel satu kata-kata per baris → preview kartu → simpan sebagai draft → review →
+publish → muncul di game.
+D. Admin membuat kartu visual: Studio Kartu → pilih tema/template → atur warna,
+karakter, teks → cek kontras → simpan → ekspor atau publish.
+E. Room (fase 2): Host membuat room → kode 6 karakter → teman bergabung lewat
+kode/QR → host memulai → pemain bergiliran menarik kartu secara realtime.
+8. Spesifikasi: Landing Page (F-01)
+8.1 Pemetaan dari foto referensi
+Rute Halaman Akses Fase
+/room/[code] Lobi dan game
+multiplayer
+Publik (pakai
+kode)
+P2
+/admin Dashboard Editor/Admin P0
+/admin/themes Kelola tema Admin P0
+/admin/cards , /admin/cards/new ,
+/admin/cards/import
+Kata-kata/kartu, tambah
+massal, import
+Editor/Admin P0
+/admin/studio/[id?] Studio Kartu Editor/Admin P1
+/admin/assets Media/aset karakter Editor/Admin P0
+/admin/users , /admin/audit ,
+/admin/settings
+Pengguna, audit,
+pengaturan
+Admin P1
+Elemen di referensi Implementasi di produk ini
+Logo di tengah navigasi Logo produk (placeholder sampai logo final
+ada)
+Tab “Games” dan “Store” di kiri Tab Main dan Tema
+Kolom pencarian + ikon filter Cari tema/kartu + filter level
+PRD — Website Game Kartu Percakapan
+Page 8 of 10
+--- PAGE 8 ---
+8.2 Tata letak dan perilaku
++------------------------------------------------------------------+
+| o Main   Tema    [ Cari tema atau kartu...  filter ]    LOGO   (avatar) |
+|                                                                  |
+|                    [ 6 Tema · 300+ Kartu ]                       |
+|                      Kocok Kartu.                                |
+|                      Mulai Obrolan.                              |
+|            deskripsi singkat, abu-abu, maks 2 baris              |
+|                [ Mulai Main ]   [ Lihat Tema ]                   |
+|  ::grid::                                             ::grid::   |
+|       +----+   +------+  +----------+  +------+   +----+         |
+|       | 01 |   |  02  |  |    03    |  |  04  |   | 05 |         |
+|       +----+   +------+  +----------+  +------+   +----+         |
++------------------------------------------------------------------+
+Latar: hitam kebiruan ( #0B0B0F ), garis grid tipis (putih 5%), sudut jendela membulat
+besar.
+Kipas kartu: 5 kartu terlihat. Kartu tengah 1,0×, tetangga 0,88× diputar ±6°, terluar
+0,78× diputar ±12°; bagian bawah terpotong tepi hero. Kartu ke-6 muncul saat kipas
+digeser.
+Elemen di referensi Implementasi di produk ini
+Ikon tas, ikon kecil, pill koin Ikon favorit dan riwayat; pill streak/poin
+disembunyikan di MVP (F-20)
+Avatar bulat di kanan Avatar profil atau tombol Masuk
+Badge kecil di atas judul Badge dinamis: “6 Tema · {jumlah} Kartu” dari
+database
+Judul besar 2 baris, putih, tebal Judul hero (teks final dari kamu), contoh:
+“Kocok Kartu. Mulai Obrolan.”
+Deskripsi abu-abu 1–2 kalimat penjelasan
+Grid perspektif + ikon melayang di sisi kiri-
+kanan
+Grid ringan (CSS) + stiker karakter tema
+yang melayang pelan (parallax)
+Kipas 5 kartu, tengah paling besar,
+terpotong tepi bawah
+Kipas kartu tema (6 tema), kartu tengah jadi
+fokus
+Kartu: judul kiri atas, subjudul, pill kanan
+atas, karakter besar
+<ThemeCard> : nama tema, subtitle, pill
+nomor, karakter animasi, panel kata-kata
+PRD — Website Game Kartu Percakapan
+Page 9 of 10
+--- PAGE 9 ---
+Interaksi: hover/focus mengangkat kartu 16 px; klik membuka halaman tema;
+drag/swipe memutar kipas dengan inertia (ini juga menjadi “spin” kecil di landing);
+auto-rotate pelan tiap 6 dtk (berhenti saat pointer di atas kipas).
+Karakter: animasi loop halus (napas, kedip, api, bintang) hanya pada kartu tengah;
+kartu lain statis agar ringan.
+Di bawah hero: (1) Pilih tema (grid 6 kartu + slot “segera hadir”), (2) Cara main 3 langkah
+(Pilih tema → Kocok/Spin → Ngobrol), (3) cuplikan Level (Ringan, Dalam, Berani), (4)
+penutup + CTA, (5) footer.
+Mobile: navigasi atas hanya logo dan avatar; tab Main/Tema pindah ke bar bawah;
+pencarian jadi ikon yang membuka overlay; kipas menjadi carousel geser (snap) dengan
+kartu tengah dominan.
+SEO dan berbagi: server-side rendering, judul/deskripsi/OG image (kipas kartu), data
+terstruktur dasar.
+8.3 Kriteria penerimaan
+Tampilan desktop dan mobile mengikuti desain final yang disetujui.
+Badge jumlah tema/kartu diambil dari database, bukan teks statis.
+Mulai Main membuka /play ; kartu di kipas membuka /themes/[slug] .
+LCP ≤ 2,5 dtk di 4G; CLS ≤ 0,1; JavaScript awal ≤ 180 KB gzip.
+Dengan preferensi reduced motion, auto-rotate dan animasi loop dimatikan.
+Teks memenuhi kontras WCAG AA (4,5:1); semua elemen interaktif bisa dipakai dengan
+keyboard.
+PRD — Website Game Kartu Percakapan
+Page 10 of 10
